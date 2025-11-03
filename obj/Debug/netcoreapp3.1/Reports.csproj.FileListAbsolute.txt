@@ -1,0 +1,8 @@
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.csproj.AssemblyReference.cache
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.GeneratedMSBuildEditorConfig.editorconfig
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.AssemblyInfoInputs.cache
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.AssemblyInfo.cs
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.csproj.CoreCompileInputs.cache
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.MvcApplicationPartsAssemblyInfo.cache
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.RazorAssemblyInfo.cache
+E:\Hossam\Reports\obj\Debug\netcoreapp3.1\Reports.RazorAssemblyInfo.cs

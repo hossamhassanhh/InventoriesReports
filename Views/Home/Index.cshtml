@@ -1,0 +1,32 @@
+﻿@*< div>
+	<h2>Enventories Reports</h2>
+	<ul>
+		<li>
+			<a href="@Url.Action("AllMaterialsReport", "Home")">مخزون المهمات</a>
+		</li>		
+		<li>
+			<a href="@Url.Action("PersonalCustodyReport", "Home")">استعلام عن عهدة الموظف</a>
+		</li>
+		@@*<li>
+			<a href="@Url.Action("PersonalCustodyCrystalReport", "Home")">عهدة الموظف</a>
+		</li>
+	</ul>
+	
+</div> 
+*@
+
+
+@{
+	ViewData["Title"] = "Home";
+}
+
+<ul>
+	<li>
+		<a href="@Url.Action("AllMaterialsReport", "Home")">مخزون المهمات</a>
+	</li>
+	<li>
+		<a href="@Url.Action("PersonalCustodyReport", "Home")">استعلام عن عهدة الموظف</a>
+	</li>
+	<li><a href="/Home/MaterialsQuantityReport">تقرير ارصدة المهمات</a></li>
+	<li><a href="/Home/AssetsQuantityReport">تقرير ارصدة الاصول</a></li>
+</ul>

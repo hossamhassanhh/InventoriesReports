@@ -1,0 +1,2 @@
+DELETE FROM blcstr
+WHERE     (mtrl = '5914012653')
