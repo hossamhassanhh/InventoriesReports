@@ -47,178 +47,104 @@ namespace Reports.Controllers
 			return cell;
 		}
 
-		[Route("/Home/AllMaterialsReportGetResult")]
-		public IActionResult AllMaterialsReportGetResult()
-		{
-			//string connectionString = @"Data Source=PMS-MB-STOREAPP\MSSQLSERVER,1433;Initial Catalog=PLANDB;User ID=pms\av;Password=K@$perAV;";
-			//string connectionString = @"Data Source=.\MSSQLSERVER;Initial Catalog=Test;Trusted_Connection = True;";
-			string connectionString = _options.Value.ConnectionString;
+        [HttpGet("Home/AllMaterialsReportGetResult")]
+        public async Task<IActionResult> AllMaterialsReportGetResult()
+        {
+            string connectionString = _options.Value.ConnectionString;
 
-			using (SqlConnection connection = new SqlConnection(connectionString))
-			{
-				connection.Open();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
 
-				// Execute your SQL query using the connection
-				using (SqlCommand command = connection.CreateCommand())
-				{
-					command.CommandText = "SELECT [CODE]\r\n      ,[DES]\r\n      ,[UNT]\r\n  FROM [dbo].[FMTRL]";
-					//command.CommandText = "SELECT [CODE]\r\n      ,REPLACE(REPLACE([DES], CHAR(13), ''), CHAR(10), '')\r\n      ,[UNT]\r\n  FROM [dbo].[FMTRL]";
-					//command.CommandText = "select * from [dbo].[Categories]";
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT [CODE], [DES], [UNT] FROM [dbo].[FMTRL]";
 
-					using (SqlDataAdapter adapter = new SqlDataAdapter(command))
-					{
-						////////////////
-						
-						DataTable dt = new DataTable();
-						adapter.Fill(dt);
-						#region 4
-						// Create a new Excel document
-						using (MemoryStream stream = new MemoryStream())
-						{
-							using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
-							{
-								// Add a workbook part to the document
-								WorkbookPart workbookPart = document.AddWorkbookPart();
-								workbookPart.Workbook = new Workbook();
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    {
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
 
-								// Add a worksheet part to the workbook
-								WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-								worksheetPart.Worksheet = new Worksheet(new SheetData());
+                        using (MemoryStream stream = new MemoryStream())
+                        {
+                            using (SpreadsheetDocument document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+                            {
+                                WorkbookPart workbookPart = document.AddWorkbookPart();
+                                workbookPart.Workbook = new Workbook();
 
-								// Get the sheet data of the worksheet
-								SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+                                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                                worksheetPart.Worksheet = new Worksheet(new SheetData());
 
-								// Add headers to the sheet data
-								Row headerRow = new Row();
-								headerRow.Append(
-									CreateCell("Code"),
-									CreateCell("Description"),
-									CreateCell("Unit Of Measure")
-								);
-								sheetData.Append(headerRow);
+                                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-								// Add data rows to the sheet data
-								foreach (DataRow row in dt.Rows)
-								{
-									Row dataRow = new Row();
-									dataRow.Append(
-										CreateCell(row["CODE"].ToString()),
-										CreateCell(row["DES"].ToString()),
-										CreateCell(row["UNT"].ToString())
-									);
-									sheetData.Append(dataRow);
-								}
+                                // Header row
+                                Row headerRow = new Row();
+                                headerRow.Append(
+                                    CreateCell("Code"),
+                                    CreateCell("Description"),
+                                    CreateCell("Unit Of Measure")
+                                );
+                                sheetData.Append(headerRow);
 
-								// Add the worksheet to the workbook
-								Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
-								Sheet sheet = new Sheet() { Id = workbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Sheet1" };
-								sheets.Append(sheet);
+                                // Data rows
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    Row dataRow = new Row();
+                                    dataRow.Append(
+                                        CreateCell(row["CODE"].ToString()),
+                                        CreateCell(row["DES"].ToString()),
+                                        CreateCell(row["UNT"].ToString())
+                                    );
+                                    sheetData.Append(dataRow);
+                                }
 
-								// Save the workbook
-								workbookPart.Workbook.Save();
+                                // Add sheet info
+                                Sheets sheets = workbookPart.Workbook.AppendChild(new Sheets());
+                                Sheet sheet = new Sheet()
+                                {
+                                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                                    SheetId = 1,
+                                    Name = "Sheet1"
+                                };
+                                sheets.Append(sheet);
 
-								// Close the document
-								document.Close();
-							}
+                                workbookPart.Workbook.Save();
+                            }
 
-							// Set the content type and file name for the response
-							Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-							Response.Headers.Add("content-disposition", "attachment; filename=AllMaterialsReport.xlsx");
+                            // Reset position before reading
+                            stream.Position = 0;
 
-							// Write the Excel document to the response output stream
-							Response.Body.WriteAsync(stream.ToArray());
-						}
-						#endregion 4
-						#region 3
-						//// Create a new Excel package
-						//using (ExcelPackage package = new ExcelPackage())
-						//{							
-						//	// Create the worksheet
-						//	ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Sheet1");
-
-						//	// Load data from DataTable to the worksheet
-						//	worksheet.Cells["A1"].LoadFromDataTable(dt, true);
-
-						//	// Set the content type and file name for the response
-						//	Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-						//	Response.Headers.Add("content-disposition", "attachment; filename=report.xlsx");
-
-						//	// Write the Excel package to the response output stream
-						//	Response.Body.WriteAsync(package.GetAsByteArray());
-						//}
-						#endregion 3
-						////////////////
-						#region 2
-						//using (XLWorkbook wb = new XLWorkbook())
-						//{
-						//	string sheetName = "Sheet1"; // Default sheet name
-						//	if (!string.IsNullOrEmpty(dt.TableName))
-						//	{
-						//		sheetName = dt.TableName; // Use the DataTable name as the sheet name if available
-						//	}
-						//	wb.Worksheets.Add(dt, sheetName);
-						//	using (MemoryStream stream = new MemoryStream())
-						//	{
-						//		wb.SaveAs(stream);
-						//		try
-						//		{
-						//			string userProfileDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-						//			string filePath = Path.Combine(userProfileDirectory, "Downloads", "result.xlsx");
-						//			File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", filePath);
-						//			//File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "%USERPROFILE%\\Downloads\\result.xlsx");									
-						//		}
-						//		catch (Exception)
-						//		{
-						//			Exception customEx = new Exception("error in downloading");
-						//			throw customEx;
-						//		}								
-						//	}
-						//}
-						#endregion 2
-						#region 1
-						//// Process the query result
-						//var lines = new List<string>();
-
-						//string[] columnNames = result.Columns
-						//	.Cast<DataColumn>()
-						//	.Select(column => column.ColumnName)
-						//	.ToArray();
-
-						//var header = string.Join(",", columnNames.Select(name => $"\"{name}\""));
-						//lines.Add(header);
-
-						//var valueLines = result.AsEnumerable()
-						//	.Select(row => string.Join(",", row.ItemArray.Select(val => $"\"{val}\"")));
-
-						//lines.AddRange(valueLines);
-
-						//System.IO.File.WriteAllLines(string.IsNullOrEmpty(path)? "C:\\Result.csv" : path, lines);
-						#endregion 1
-
-						return View("Done");
-					}
-				}
-			}
-		}
+                            // Return the Excel file to browser
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "AllMaterialsReport.xlsx"
+                            );
+                        }
+                    }
+                }
+            }
+        }
 
 
-		public IActionResult MaterialsQuantityReport()
+        public IActionResult MaterialsQuantityReport()
 		{
 			return View();
 		}
-		[Route("/Home/MaterialsQuantityReportGetResult/{date}")]
-        public IActionResult MaterialsQuantityReportGetResult(DateOnly date)
+        [HttpGet]
+        public async Task<IActionResult> MaterialsQuantityReportGetResult(string id)
         {
             //string connectionString = @"Data Source=PMS-MB-STOREAPP\MSSQLSERVER,1433;Initial Catalog=PLANDB;User ID=pms\av;Password=K@$perAV;";
             //string connectionString = @"Data Source=.\MSSQLSERVER;Initial Catalog=Test;Trusted_Connection = True;";
+            DateOnly date = DateOnly.Parse(id);
             string connectionString = _options.Value.ConnectionString;
-
-			// Convert to string in m/d/yyyy format
-			string date_str = date.ToString("M/d/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            // Convert to string in m/d/yyyy format
+            string date_str = date.ToString("M/d/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+			//string date_str = date.ToString("M/d/yyyy", System.Globalization.CultureInfo.InvariantCulture);
 
 			using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                connection.Open();
+                await connection.OpenAsync();
 
                 // Execute your SQL query using the connection
                 using (SqlCommand command = connection.CreateCommand())
@@ -226,7 +152,7 @@ namespace Reports.Controllers
                     command.CommandText = $"DECLARE @S_FROM_DTE   DATETIME \r\n DECLARE @S_TO_DTE     DATETIME \r\n DECLARE @S_FROM_CODE  CHAR(11)\r\n DECLARE @S_TO_CODE    CHAR(11)\r\n DECLARE @S_SW         INT\r\n-- \r\n-- \r\n SET @S_FROM_DTE  = '{date_str}'\r\n SET @S_TO_DTE    = '{date_str}'\r\n SET @S_FROM_CODE = '00000000000'\r\n SET @S_TO_CODE   = 'zzzzzzzzzzz'\r\n SET @S_SW        = 1\r\n\r\n\r\nSET NOCOUNT ON\r\nSET ARITHIGNORE ON\r\nSET ARITHABORT  OFF\r\nSET ANSI_WARNINGS OFF\r\n---------------------------\r\nIF @S_SW = 1 \r\nSELECT \tFINVNT.STOR  ,  \r\n\tFSTOR.DES    ,\r\n\tFINVNT.MTRL  ,\r\n\tFMTRL.DES    AS MTRL_DES ,\r\n\tFMTRL.UNT    ,\t\r\n\tCOALESCE(FMVMNT_SUB.BG_BAL , 0)  + COALESCE(FINVNT.BG_BAL , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_IN     , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_RET    , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXIN   , 0)  -\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXOUT  , 0)  -\r\n\tCOALESCE(FMVMNT_SUB1.QUT_OUT    , 0)  AS RESULT\r\n\t  \r\n\r\n\r\nFROM  FINVNT LEFT JOIN FSTOR ON  FINVNT.STOR = FSTOR.CODE  \r\n\t     LEFT JOIN FMTRL ON  FINVNT.MTRL = FMTRL.CODE  \r\n\r\n--الرصيد الافتتاحى من ملف FMVMNT\r\n--------------------------------\r\n\t     LEFT JOIN (SELECT \tFMVMNT.STOR , FMVMNT.MTRL ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2 OR\r\n \t\t\t\t\t\t\tFMVMNT.KIND = 3 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 4) \r\n\t\t\t\t\t\t  \tTHEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) -\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 11) \r\n\t\t\t\t\t\t  \tTHEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS BG_BAL ,\r\n\r\n\t\t\t\t(COALESCE(SUM(CASE WHEN  FMVMNT.KIND = 4 THEN FMVMNT.PRICE  ELSE 0 END) , 0) +\r\n\t\t\t\t COALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2 OR\r\n \t\t\t\t\t\t\t FMVMNT.KIND = 3)\r\n \t\t\t\t\t  \t  THEN (FMVMNT.QUT_UNT * FMVMNT.PRICE)  ELSE 0 END) , 0)) -\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 11) \r\n\t\t\t\t\t\t  \tTHEN (FMVMNT.QUT_UNT * FMVMNT.PRICE) ELSE 0 END) , 0) AS BG_VAL\r\n\r\n\r\n\t\t\tFROM  FMVMNT \r\n\t\t\tWHERE (FMVMNT.DTE < @S_FROM_DTE)\r\n\t\t\tGROUP BY FMVMNT.STOR , FMVMNT.MTRL) AS FMVMNT_SUB ON \r\n\t\t\t\t\t\t\t\t FMVMNT_SUB.STOR = FINVNT.STOR AND\r\n\t\t\t\t\t\t\t\t FMVMNT_SUB.MTRL = FINVNT.MTRL\r\n\r\n\r\n--تجميع الحركة من ملف FMVMNT\r\n----------------------------\r\n\t     LEFT JOIN (SELECT \tFMVMNT.STOR , \r\n\t\t\t\tFMVMNT.MTRL  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 4) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_IN     ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 4) THEN (FMVMNT.PRICE)  ELSE 0 END) , 0) AS VAL_IN     ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_RET    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2) THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_RET    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 3) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_EXIN   ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 3) THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_EXIN   ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 11)THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_EXOUT  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 11)THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_EXOUT  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10)THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_OUT    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10)THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_OUT\r\n\r\n\t\t\tFROM  FMVMNT LEFT JOIN FCOST ON FMVMNT.COST = FCOST.CODE\r\n\t\t\tWHERE (FMVMNT.DTE BETWEEN @S_FROM_DTE AND @S_TO_DTE) AND\r\n\t\t\t      (FMVMNT.MTRL BETWEEN @S_FROM_CODE AND @S_TO_CODE)\r\n\r\n\t\t\tGROUP BY FMVMNT.STOR  , \r\n\t\t\t\t FMVMNT.MTRL  ) AS FMVMNT_SUB1 ON FMVMNT_SUB1.STOR = FINVNT.STOR AND\r\n\t\t\t\t\t\t\t\t  FMVMNT_SUB1.MTRL = FINVNT.MTRL\r\n\r\nWHERE (FINVNT.MTRL BETWEEN @S_FROM_CODE AND @S_TO_CODE)\r\n\r\nGROUP BY FINVNT.STOR         ,  \r\n\tFSTOR.DES            ,\r\n\tFINVNT.MTRL          ,\r\n\tFMTRL.DES            ,\r\n\tFMTRL.UNT            ,\r\n\tFMVMNT_SUB.BG_BAL    ,\r\n\tFINVNT.BG_BAL        ,\r\n\tFMVMNT_SUB.BG_VAL    , \r\n\tFINVNT.BG_PRICE      ,\r\n\tFMVMNT_SUB1.QUT_IN     ,\r\n\tFMVMNT_SUB1.QUT_RET    ,\r\n\tFMVMNT_SUB1.QUT_EXIN   ,\r\n\tFMVMNT_SUB1.QUT_EXOUT  ,\r\n\tFMVMNT_SUB1.QUT_OUT    ,\r\n\tFMVMNT_SUB1.VAL_IN     ,\r\n\tFMVMNT_SUB1.VAL_RET    ,\r\n\tFMVMNT_SUB1.VAL_EXIN   ,\r\n\tFMVMNT_SUB1.VAL_EXOUT  ,\r\n\tFMVMNT_SUB1.VAL_OUT    \r\n\r\n\r\nHAVING \r\n\t(COALESCE(FMVMNT_SUB.BG_BAL , 0)  + COALESCE(FINVNT.BG_BAL , 0)  > 0 OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_IN     , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_RET    , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXIN   , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXOUT  , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_OUT    , 0)  > 0    )  \r\n\r\nORDER BY FINVNT.MTRL\r\n\r\n\r\n\r\n\r\nIF @S_SW = 2 \r\nSELECT \tFINVNT.STOR  ,  \r\n\tFSTOR.DES    ,\r\n\tFINVNT.MTRL  ,\r\n\tFMTRL.DES    AS MTRL_DES ,\r\n\tFMTRL.UNT    ,\t\r\n\tCOALESCE(FMVMNT_SUB.BG_BAL , 0)  + COALESCE(FINVNT.BG_BAL , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_IN     , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_RET    , 0)  +\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXIN   , 0)  -\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXOUT  , 0)  -\r\n\tCOALESCE(FMVMNT_SUB1.QUT_OUT    , 0)  AS RESULT \r\n\r\n\r\nFROM  FINVNT LEFT JOIN FSTOR ON  FINVNT.STOR = FSTOR.CODE  \r\n\t     LEFT JOIN FMTRL ON  FINVNT.MTRL = FMTRL.CODE  \r\n\r\n--الرصيد الافتتاحى من ملف FMVMNT\r\n--------------------------------\r\n\t     LEFT JOIN (SELECT \tFMVMNT.STOR , FMVMNT.MTRL ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2 OR\r\n \t\t\t\t\t\t\tFMVMNT.KIND = 3 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 4) \r\n\t\t\t\t\t\t  \tTHEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) -\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 11) \r\n\t\t\t\t\t\t  \tTHEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS BG_BAL ,\r\n\r\n\t\t\t\t(COALESCE(SUM(CASE WHEN  FMVMNT.KIND = 4 THEN FMVMNT.PRICE  ELSE 0 END) , 0) +\r\n\t\t\t\t COALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2 OR\r\n \t\t\t\t\t\t\t FMVMNT.KIND = 3)\r\n \t\t\t\t\t  \t  THEN (FMVMNT.QUT_UNT * FMVMNT.PRICE)  ELSE 0 END) , 0)) -\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10 OR\r\n\t\t\t\t\t\t\tFMVMNT.KIND = 11) \r\n\t\t\t\t\t\t  \tTHEN (FMVMNT.QUT_UNT * FMVMNT.PRICE) ELSE 0 END) , 0) AS BG_VAL\r\n\r\n\r\n\t\t\tFROM  FMVMNT \r\n\t\t\tWHERE (FMVMNT.DTE < @S_FROM_DTE)\r\n\t\t\tGROUP BY FMVMNT.STOR , FMVMNT.MTRL) AS FMVMNT_SUB ON \r\n\t\t\t\t\t\t\t\t FMVMNT_SUB.STOR = FINVNT.STOR AND\r\n\t\t\t\t\t\t\t\t FMVMNT_SUB.MTRL = FINVNT.MTRL\r\n\r\n\r\n--تجميع الحركة من ملف FMVMNT\r\n----------------------------\r\n\t     LEFT JOIN (SELECT \tFMVMNT.STOR , \r\n\t\t\t\tFMVMNT.MTRL  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 4) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_IN     ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 4) THEN (FMVMNT.PRICE)  ELSE 0 END) , 0) AS VAL_IN     ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_RET    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 2) THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_RET    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 3) THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_EXIN   ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 3) THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_EXIN   ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 11)THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_EXOUT  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 11)THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_EXOUT  ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10)THEN FMVMNT.QUT_UNT  ELSE 0 END) , 0) AS QUT_OUT    ,\r\n\t\t\t\tCOALESCE(SUM(CASE WHEN (FMVMNT.KIND = 10)THEN (FMVMNT.PRICE * FMVMNT.QUT_UNT)  ELSE 0 END) , 0) AS VAL_OUT\r\n\r\n\t\t\tFROM  FMVMNT LEFT JOIN FCOST ON FMVMNT.COST = FCOST.CODE\r\n\t\t\tWHERE (FMVMNT.DTE BETWEEN @S_FROM_DTE AND @S_TO_DTE) AND\r\n\t\t\t      (FMVMNT.MTRL BETWEEN @S_FROM_CODE AND @S_TO_CODE)\r\n\r\n\t\t\tGROUP BY FMVMNT.STOR  , \r\n\t\t\t\t FMVMNT.MTRL  ) AS FMVMNT_SUB1 ON FMVMNT_SUB1.STOR = FINVNT.STOR AND\r\n\t\t\t\t\t\t\t\t  FMVMNT_SUB1.MTRL = FINVNT.MTRL\r\n\r\nWHERE (FINVNT.MTRL BETWEEN @S_FROM_CODE AND @S_TO_CODE)\r\n\r\nGROUP BY FINVNT.STOR         ,  \r\n\tFSTOR.DES            ,\r\n\tFINVNT.MTRL          ,\r\n\tFMTRL.DES            ,\r\n\tFMTRL.UNT            ,\r\n\tFMVMNT_SUB.BG_BAL    ,\r\n\tFINVNT.BG_BAL        ,\r\n\tFMVMNT_SUB.BG_VAL    , \r\n\tFINVNT.BG_PRICE      ,\r\n\tFMVMNT_SUB1.QUT_IN     ,\r\n\tFMVMNT_SUB1.QUT_RET    ,\r\n\tFMVMNT_SUB1.QUT_EXIN   ,\r\n\tFMVMNT_SUB1.QUT_EXOUT  ,\r\n\tFMVMNT_SUB1.QUT_OUT    ,\r\n\tFMVMNT_SUB1.VAL_IN     ,\r\n\tFMVMNT_SUB1.VAL_RET    ,\r\n\tFMVMNT_SUB1.VAL_EXIN   ,\r\n\tFMVMNT_SUB1.VAL_EXOUT  ,\r\n\tFMVMNT_SUB1.VAL_OUT    \r\n\r\n\r\nHAVING \r\n--\t(COALESCE(FMVMNT_SUB.BG_BAL , 0)  + COALESCE(FINVNT.BG_BAL , 0)  > 0 OR\r\n\t(COALESCE(FMVMNT_SUB1.QUT_IN     , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_RET    , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXIN   , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_EXOUT  , 0)  > 0    OR\r\n\tCOALESCE(FMVMNT_SUB1.QUT_OUT    , 0)  > 0    )  \r\n\r\nORDER BY FINVNT.MTRL\r\n";
                     //command.CommandText = "SELECT [CODE]\r\n      ,REPLACE(REPLACE([DES], CHAR(13), ''), CHAR(10), '')\r\n      ,[UNT]\r\n  FROM [dbo].[FMTRL]";
                     //command.CommandText = "select * from [dbo].[Categories]";
-
+                    command.CommandTimeout = 300;
                     using (SqlDataAdapter adapter = new SqlDataAdapter(command))
                     {
                         ////////////////
@@ -285,16 +211,16 @@ namespace Reports.Controllers
                                 // Save the workbook
                                 workbookPart.Workbook.Save();
 
-                                // Close the document
-                                document.Close();
                             }
+                            // Reset position before reading
+                            stream.Position = 0;
 
-                            // Set the content type and file name for the response
-                            Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-                            Response.Headers.Add("content-disposition", "attachment; filename=تقرير ارصدة المهمات.xlsx");
-
-                            // Write the Excel document to the response output stream
-                            Response.Body.WriteAsync(stream.ToArray());
+                            // Return the Excel file to browser
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "تقرير ارصدة المهمات.xlsx"
+                            );
                         }
                         #endregion 4
                         #region 3
@@ -362,8 +288,6 @@ namespace Reports.Controllers
 
                         //System.IO.File.WriteAllLines(string.IsNullOrEmpty(path)? "C:\\Result.csv" : path, lines);
                         #endregion 1
-
-                        return View("Done");
                     }
                 }
             }
@@ -453,16 +377,16 @@ namespace Reports.Controllers
 								// Save the workbook
 								workbookPart.Workbook.Save();
 
-								// Close the document
-								document.Close();
 							}
+                            // Reset position before reading
+                            stream.Position = 0;
 
-							// Set the content type and file name for the response
-							Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-							Response.Headers.Add("content-disposition", "attachment; filename=تقرير ارصدة الاصول.xlsx");
-
-							// Write the Excel document to the response output stream
-							Response.Body.WriteAsync(stream.ToArray());
+                            // Return the Excel file to browser
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "تقرير ارصدة الاصول.xlsx"
+                            );
 						}
 						#endregion 4
 						#region 3
@@ -543,23 +467,23 @@ namespace Reports.Controllers
 		}
 		[Route("/Home/PersonalCustodyReportGetResult")]
 		[Route("/Home/PersonalCustodyReportGetResult/{id}")]		
-		public IActionResult PersonalCustodyReportGetResult(string id = "")
+		public async Task<IActionResult> PersonalCustodyReportGetResult(string id = "")
 		{			
 			string connectionString = _options.Value.ConnectionString;
 
 			using (SqlConnection connection = new SqlConnection(connectionString))
 			{
-				connection.Open();
+                await connection.OpenAsync();
 
-				// Execute your SQL query using the connection
-				using (SqlCommand command = connection.CreateCommand())
+                // Execute your SQL query using the connection
+                using (SqlCommand command = connection.CreateCommand())
 				{					
 					if (id == "")
 						command.CommandText = $"DECLARE\t@return_value int\r\n\r\nEXEC\t@return_value = [dbo].[ASSTP0060A]\r\n\t\t@S_FROM_EMP = 0 ,\r\n\t\t@S_TO_EMP = 999999,\r\n\t\t@S_FROM_LOC = '',\r\n\t\t@S_TO_LOC = 'ZZZZZZZZZZ'";
 					else
 						command.CommandText = $"DECLARE\t@return_value int\r\n\r\nEXEC\t@return_value = [dbo].[ASSTP0060A]\r\n\t\t@S_FROM_EMP = {id} ,\r\n\t\t@S_TO_EMP = {id},\r\n\t\t@S_FROM_LOC = '',\r\n\t\t@S_TO_LOC = 'ZZZZZZZZZZ'";
-
-					using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    command.CommandTimeout = 300;
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
 					{
 						DataTable dt = new DataTable();
 						adapter.Fill(dt);
@@ -632,13 +556,21 @@ namespace Reports.Controllers
 								// Close the document
 								document.Close();
 							}
+                            // Reset position before reading
+                            stream.Position = 0;
 
+                            // Return the Excel file to browser
+                            return File(
+                                stream.ToArray(),
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "PersonalCustodyReport.xlsx"
+                            );
 							// Set the content type and file name for the response
-							Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-							Response.Headers.Add("content-disposition", "attachment; filename=PersonalCustodyReport.xlsx");
+							//Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+							//Response.Headers.Add("content-disposition", "attachment; filename=PersonalCustodyReport.xlsx");
 
-							// Write the Excel document to the response output stream
-							Response.Body.WriteAsync(stream.ToArray());
+							//// Write the Excel document to the response output stream
+							//Response.Body.WriteAsync(stream.ToArray());
 						}
 						#endregion 2
 						#region 1
@@ -668,7 +600,7 @@ namespace Reports.Controllers
 							}
 						}
 						#endregion 1
-						return View("Done");
+						//return View("Done");
 					}
 				}
 			}

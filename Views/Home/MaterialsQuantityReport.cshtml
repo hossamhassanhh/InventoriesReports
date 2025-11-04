@@ -12,6 +12,9 @@
 <script type="text/javascript">
 	function func() {
 		var id = document.getElementById('ID').value;
-		window.location.href = '/Home/MaterialsQuantityReportGetResult/' + id
+		var url = '@Url.Action("MaterialsQuantityReportGetResult", "Home")' +
+			'?id=' + encodeURIComponent(id);
+		window.location.href = url;
+		// window.location.href = '/Home/MaterialsQuantityReportGetResult/' + id
 	}
 </script>
