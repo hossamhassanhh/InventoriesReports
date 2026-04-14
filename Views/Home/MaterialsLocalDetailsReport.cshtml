@@ -1,0 +1,20 @@
+﻿@* @model MaterialsdetailsReportViewModel *@
+<form>
+	<div>
+		@* @Html.TextBoxFor(s => s.OutputPath, new { placeholder = @"I:\PMS\Inventories\result.xlsx", @class = "form-input" })
+		@Html.TextBoxFor(s => s.ID, new { placeholder = @"4779", @class = "form-input" }) *@
+		<input type="text" name="ID" id="ID" />
+	</div>
+	<div>
+		<a onclick="func();" class="button">Download</a>
+	</div>
+</form>
+<script type="text/javascript">
+	function func() {
+		var id = document.getElementById('ID').value;
+		console.log(id);
+		window.location.href = '/Home/MaterialsLocalDetailsReportGetResult/' + id
+
+
+	}
+</script>

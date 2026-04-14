@@ -114,3 +114,4 @@ D:\Applications\Reports\obj\Release\net8.0\refint\Reports.dll
 D:\Applications\Reports\obj\Release\net8.0\Reports.pdb
 D:\Applications\Reports\obj\Release\net8.0\Reports.genruntimeconfig.cache
 D:\Applications\Reports\obj\Release\net8.0\ref\Reports.dll
+D:\Applications\Reports\obj\Release\net8.0\Reports.sourcelink.json

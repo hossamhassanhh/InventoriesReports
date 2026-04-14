@@ -36,6 +36,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Applications/Reports/Views/Home/MaterialsDetailsReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxNYXRlcmlhbHNEZXRhaWxzUmVwb3J0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Applications/Reports/Views/Home/MaterialsLocalDetailsReport.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxNYXRlcmlhbHNMb2NhbERldGFpbHNSZXBvcnQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Applications/Reports/Views/Home/MaterialsQuantityReport.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxNYXRlcmlhbHNRdWFudGl0eVJlcG9ydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
