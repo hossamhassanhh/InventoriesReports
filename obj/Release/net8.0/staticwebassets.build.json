@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "okObFXO6b98TM41i9qIenWlTGRIYOzT7ge8jShPsU00=",
+  "Hash": "rB78aE8IcJFV1xWFBePfDNO63DmnfgYBGTlVW+uai38=",
   "Source": "Reports",
   "BasePath": "_content/Reports",
   "Mode": "Default",
@@ -94,8 +94,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "kx2bffe4eo",
-      "Integrity": "aDGe+NzW9YbBFOgYjqUnSaMAO4t4uhYAat4OaW/KS+0=",
+      "Fingerprint": "3kue1h8cbs",
+      "Integrity": "zWhY0AbY5GWcEBshKop9189ZiXjYhY4wI6nAr7lRZFY=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\styles.css"
@@ -1508,6 +1508,51 @@
       ]
     },
     {
+      "Route": "css/styles.3kue1h8cbs.css",
+      "AssetFile": "D:\\Applications\\Reports\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2422"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"zWhY0AbY5GWcEBshKop9189ZiXjYhY4wI6nAr7lRZFY=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 14 Apr 2026 08:09:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "3kue1h8cbs"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-zWhY0AbY5GWcEBshKop9189ZiXjYhY4wI6nAr7lRZFY="
+        }
+      ]
+    },
+    {
       "Route": "css/styles.css",
       "AssetFile": "D:\\Applications\\Reports\\wwwroot\\css\\styles.css",
       "Selectors": [],
@@ -1518,7 +1563,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2193"
+          "Value": "2422"
         },
         {
           "Name": "Content-Type",
@@ -1526,11 +1571,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"aDGe+NzW9YbBFOgYjqUnSaMAO4t4uhYAat4OaW/KS+0=\""
+          "Value": "\"zWhY0AbY5GWcEBshKop9189ZiXjYhY4wI6nAr7lRZFY=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 08 Apr 2026 11:42:53 GMT"
+          "Value": "Tue, 14 Apr 2026 08:09:31 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1540,52 +1585,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-aDGe+NzW9YbBFOgYjqUnSaMAO4t4uhYAat4OaW/KS+0="
-        }
-      ]
-    },
-    {
-      "Route": "css/styles.kx2bffe4eo.css",
-      "AssetFile": "D:\\Applications\\Reports\\wwwroot\\css\\styles.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "2193"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"aDGe+NzW9YbBFOgYjqUnSaMAO4t4uhYAat4OaW/KS+0=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 08 Apr 2026 11:42:53 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "kx2bffe4eo"
-        },
-        {
-          "Name": "label",
-          "Value": "css/styles.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-aDGe+NzW9YbBFOgYjqUnSaMAO4t4uhYAat4OaW/KS+0="
+          "Value": "sha256-zWhY0AbY5GWcEBshKop9189ZiXjYhY4wI6nAr7lRZFY="
         }
       ]
     },
